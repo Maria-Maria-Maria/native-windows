@@ -1,14 +1,21 @@
 class Window {
-    constructor(name, navElement) {
+    constructor(name, lowerWindows) {
         this.name = name;
         this.element = null;
         this.icon = null;
-        this.navElement = navElement;
+        this.lowerWindows = lowerWindows;
+
+        // флаг, что окно открыто
+        this.isOpen = true;
+
+        // флаг, что окно поверх все
+        this.isTop = false;
         
-        // ширина и высота от 100 до 500 px
-        this.width = (Math.random() * (500 - 100) + 100).toFixed();
-        this.height = (Math.random() * (500 - 100) + 100).toFixed();
+        // ширина и высота от 200 до 500 px
+        this.width = (Math.random() * (500 - 200) + 100).toFixed();
+        this.height = (Math.random() * (500 - 200) + 100).toFixed();
         
+        // рандомные координаты 
         this.x = (Math.random() * (window.innerWidth - this.width)).toFixed();
         this.y = (Math.random() * (window.innerHeight - this.height)).toFixed();
     }
@@ -20,11 +27,49 @@ class Window {
         this.element.style.left = this.x + 'px';
         this.element.style.height = this.height + 'px';
         this.element.style.width = this.width + 'px'; 
+        this.element.className = 'top'
+        this.element.draggable=true;
 
-        this.element.onclick = () => (console.log(this.name))
+        // окно поверх остальных
+        this.element.onclick = () => {
+            this.lowerWindows(); 
+            this.isTop = true;
+            this.element.classList.add('top');
+        }
 
         this.createNav();
         this.initIconWindow();
+
+        var mousePosition;
+        var offset = [0,0];
+        var  div = this.element;
+        var isDown = false;
+
+        this.element.addEventListener('mousedown', function(e) {
+            isDown = true;
+            offset = [
+                div.offsetLeft - e.clientX,
+                div.offsetTop - e.clientY
+            ];
+        }, true);
+        
+        document.addEventListener('mouseup', function() {
+            isDown = false;
+        }, true);
+        
+        document.addEventListener('mousemove', function(event) {
+            event.preventDefault();
+            if (isDown) {
+                mousePosition = {
+        
+                    x : event.clientX,
+                    y : event.clientY
+        
+                };
+                div.style.left = (mousePosition.x + offset[0]) + 'px';
+                div.style.top  = (mousePosition.y + offset[1]) + 'px';
+            }
+        }, true);
         
         return this.element;
     }
@@ -32,8 +77,22 @@ class Window {
     initIconWindow() {
         this.icon = document.createElement('div');
         this.icon.id = 'icon-window-' + this.name;
+        this.icon.innerText = 'window ' + this.name;
+        
+        // открыть окно и расположить поверх
+        this.icon.onclick = () => {
+            if (!this.isOpen) {
+                this.element.classList.remove('hidden');
+                this.isOpen = true;
+            }
+            
+            this.lowerWindows(); 
+            this.isTop = true;
+            this.element.classList.add('top'); 
+        }
 
-        this.navElement.appendChild(this.icon)
+        // добавить на рабочую панель
+        document.getElementById('navbar').appendChild(this.icon)
     }
 
     createNav() {
@@ -44,8 +103,33 @@ class Window {
         let closeButton = document.createElement('button');
             closeButton.id = 'close-button-' + this.name;
             closeButton.innerText = 'x';
+            
+            // удалить окно
+            closeButton.onclick = () => {
+                this.element.remove();
+                this.icon.remove();
+            }
+        
+        let miniButton = document.createElement('button');
+            miniButton.id = 'mini-button-' + this.name;
+            miniButton.innerText = '_';
+            
+            // свернуть окно
+            miniButton.onclick = () => {
+                if (this.isOpen) {
+                    this.element.classList.add('hidden');
+                    this.isOpen = false;
+                }
+            }
+
 
         navWindow.appendChild(closeButton);
+        navWindow.appendChild(miniButton);
         this.element.appendChild(navWindow);
+    }
+
+    lower() {
+        this.isTop = false;
+        this.element.classList.remove('top');
     }
 }
