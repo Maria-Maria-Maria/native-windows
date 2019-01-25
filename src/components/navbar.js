@@ -4,8 +4,6 @@ class Navbar {
         this.element = null;
         this.countWindows = countWindows;
         this.createWindow = createWindow;
-
-        // this.createWindow = this.createWindow.bind(this);
     }
 
     initNavbar() {

@@ -17,13 +17,13 @@ class Workspace {
     }
 
     lowerWindows() {
-        for (let window of this.windows) {
-            window.lower()
-        }
+        this.windows.map((window) => {
+            window.lower();        }
+        ) 
     }
 
     createWindow() {  
-        let window = new Window(this.countWindows, this.lowerWindows, this.dragItem);
+        let window = new Window(this.countWindows, this.lowerWindows);
         
         let workspace = document.getElementById('workspace');        
             workspace.appendChild(window.initWindow());

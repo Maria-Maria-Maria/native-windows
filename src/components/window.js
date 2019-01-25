@@ -40,37 +40,10 @@ class Window {
         this.createNav();
         this.initIconWindow();
 
-        var mousePosition;
-        var offset = [0,0];
-        var  div = this.element;
-        var isDown = false;
-
-        this.element.addEventListener('mousedown', function(e) {
-            isDown = true;
-            offset = [
-                div.offsetLeft - e.clientX,
-                div.offsetTop - e.clientY
-            ];
-        }, true);
-        
-        document.addEventListener('mouseup', function() {
-            isDown = false;
-        }, true);
-        
-        document.addEventListener('mousemove', function(event) {
-            event.preventDefault();
-            if (isDown) {
-                mousePosition = {
-        
-                    x : event.clientX,
-                    y : event.clientY
-        
-                };
-                div.style.left = (mousePosition.x + offset[0]) + 'px';
-                div.style.top  = (mousePosition.y + offset[1]) + 'px';
-            }
-        }, true);
-        
+        // перемещать окно
+        let mover = new Mover(this.element);
+            mover.initMover();
+       
         return this.element;
     }
 
@@ -79,16 +52,24 @@ class Window {
         this.icon.id = 'icon-window-' + this.name;
         this.icon.innerText = 'window ' + this.name;
         
-        // открыть окно и расположить поверх
-        this.icon.onclick = () => {
+        this.icon.onclick = () => {            
+            // открыть окно и расположить поверх
             if (!this.isOpen) {
                 this.element.classList.remove('hidden');
                 this.isOpen = true;
             }
-            
-            this.lowerWindows(); 
-            this.isTop = true;
-            this.element.classList.add('top'); 
+
+             // если окно поверх остальных - скрыть, иначе - отобразить поверх остальных 
+            if (this.isTop) {
+                this.element.classList.add('hidden');
+                this.element.classList.remove('top');
+                this.isOpen = false;
+                this.isTop = false;
+            } else {
+                this.lowerWindows(); 
+                this.isTop = true;
+                this.element.classList.add('top');
+            }
         }
 
         // добавить на рабочую панель
@@ -121,7 +102,6 @@ class Window {
                     this.isOpen = false;
                 }
             }
-
 
         navWindow.appendChild(closeButton);
         navWindow.appendChild(miniButton);
